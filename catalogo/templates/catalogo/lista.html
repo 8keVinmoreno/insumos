@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo INSUMOS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5f7;
+            margin: 0;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .catalogo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .producto {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px #ddd;
+        }
+
+        .producto img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+        }
+
+        .codigo {
+            color: #777;
+            font-size: 14px;
+        }
+
+
+        .buscador-container {
+            max-width: 720px;
+            margin: 35px auto;
+            padding: 0 15px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 7px 8px 7px 20px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+            transition: all 0.25s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: #315d8a;
+            box-shadow: 0 0 0 4px rgba(49, 93, 138, 0.10);
+        }
+
+        .icono-busqueda {
+            color: #8492a6;
+            font-size: 19px;
+            margin-right: 14px;
+        }
+
+        .input-container input {
+            flex: 1;
+            min-width: 0;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 14px 0;
+            font-size: 15px;
+            color: #1e293b;
+        }
+
+        .input-container input::placeholder {
+            color: #a0aaba;
+        }
+
+        .btn-buscar {
+            width: 48px;
+            height: 46px;
+            border: none;
+            border-radius: 12px;
+            background: #193b63;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+            transition: background 0.25s, transform 0.25s;
+        }
+
+        .btn-buscar:hover {
+            background: #285785;
+            transform: translateY(-1px);
+        }
+
+        .texto-ayuda {
+            color: #94a3b8;
+            font-size: 12px;
+            margin: 12px 4px;
+        }
+
+        @media (max-width: 600px) {
+            .buscador-container {
+                margin: 20px auto;
+            }
+        }
+
+
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .paginacion a {
+            text-decoration: none;
+            color: #193b63;
+            background: white;
+            border: 1px solid #dce3ec;
+            padding: 11px 17px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .paginacion a:hover {
+            background: #193b63;
+            color: white;
+        }
+
+        .pagina-actual {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .paginacion {
+                gap: 6px;
+            }
+
+            .paginacion a {
+                padding: 9px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>CATÁLOGO INSUMOS</h1>
+
+    <div class="buscador-container">
+
+        <form method="GET" action="{% url 'lista_productos' %}" class="buscador">
+
+            <div class="input-container">
+                <span class="icono-busqueda">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+
+                <input type="text" name="q" placeholder="Buscar por nombre de producto..." value="{{ busqueda }}">
+
+                <button type="submit" class="btn-buscar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+
+        </form>
+
+
+    </div>
+
+
+
+    <div class="catalogo">
+
+        {% for producto in productos %}
+
+        <div class="producto">
+
+            {% if producto.foto %}
+            <img src="{{ producto.foto.url }}" alt="{{ producto.nombre }}">
+            {% endif %}
+
+            <h2>{{ producto.nombre }}</h2>
+
+            <p class="codigo">
+                Código: {{ producto.codigo }}
+            </p>
+
+            <p>{{ producto.descripcion }}</p>
+
+        </div>
+
+        {% empty %}
+
+        <p>No hay productos registrados.</p>
+
+        {% endfor %}
+
+
+        {% if productos.has_other_pages %}
+
+        <div class="paginacion">
+
+            {% if productos.has_previous %}
+            <a href="?q={{ busqueda|urlencode }}&page=1">
+                Primera
+            </a>
+
+            <a href="?q={{ busqueda|urlencode }}&page={{ productos.previous_page_number }}">
+                Anterior
+            </a>
+            {% endif %}
+
+            <span class="pagina-actual">
+                Página {{ productos.number }}
+                de {{ productos.paginator.num_pages }}
+            </span>
+
+            {% if productos.has_next %}
+            <a href="?q={{ busqueda|urlencode }}&page={{ productos.next_page_number }}">
+                Siguiente
+            </a>
+
+            <a href="?q={{ busqueda|urlencode }}&page={{ productos.paginator.num_pages }}">
+                Última
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+
+    </div>
+
+</body>
+
+</html>
